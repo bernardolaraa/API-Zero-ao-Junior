@@ -2,6 +2,8 @@
 const {
   Model
 } = require('sequelize');
+const bcrypt = require('bcryptjs');
+
 module.exports = (sequelize, DataTypes) => {
   class Users extends Model {
     /**
@@ -29,8 +31,8 @@ module.exports = (sequelize, DataTypes) => {
       unique: true,
     },
     psw: {
-      type: DataTypes.STRING(500),
-      allowNull: false,
+      type: DataTypes.STRING(255),
+      allowNull: false
     },
     isAdmin: {
       type: DataTypes.BOOLEAN,
@@ -40,5 +42,16 @@ module.exports = (sequelize, DataTypes) => {
     sequelize,
     modelName: 'Users',
   });
+  
+  Users.addHook('beforeSave', async crypt => {
+    return bcrypt.hash(crypt.psw, 8)
+    .then(hash => {
+      crypt.psw = hash;
+    })
+    .catch(err => {
+      throw new Error();
+    });
+  });
+ 
   return Users;
 };

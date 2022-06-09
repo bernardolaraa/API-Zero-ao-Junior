@@ -9,8 +9,9 @@ module.exports = {
         primaryKey: true,
       },
       url: {
-        type: Sequelize.DataTypes.STRING(500),
+        type: Sequelize.DataTypes.STRING(255),
         allowNull: false,
+        unique: true
       },
       postId: {
         type: Sequelize.DataTypes.UUID,

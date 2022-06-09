@@ -13,11 +13,11 @@ module.exports = {
         allowNull: false,
       },
       subtitle: {
-        type: Sequelize.DataTypes.STRING(1000),
+        type: Sequelize.DataTypes.STRING(255),
         allowNull: false, 
       },
       text: {
-        type: Sequelize.DataTypes.STRING(5000),
+        type: Sequelize.DataTypes.STRING(255),
         allowNull: false,
       },
       userId: {

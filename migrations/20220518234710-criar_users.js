@@ -18,8 +18,8 @@ module.exports = {
         unique: true,
       },
       psw: {
-        type: Sequelize.DataTypes.STRING(500),
-        allowNull: false,
+        type: Sequelize.DataTypes.STRING(255),
+        allowNull: false
       },
       isAdmin: {
         type: Sequelize.DataTypes.BOOLEAN,

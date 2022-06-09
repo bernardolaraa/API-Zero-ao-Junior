@@ -20,7 +20,7 @@ module.exports = (sequelize, DataTypes) => {
       primaryKey: true,
     },
     url: {
-      type: DataTypes.STRING(500),
+      type: DataTypes.STRING(255),
       allowNull: false,
       unique: true
     },

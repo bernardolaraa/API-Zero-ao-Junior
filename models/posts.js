@@ -24,11 +24,11 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: false,
     },
     subtitle: {
-      type: DataTypes.STRING(1000),
+      type: DataTypes.STRING(255),
       allowNull: false, 
     },
     text: {
-      type: DataTypes.STRING(5000),
+      type: DataTypes.STRING(255),
       allowNull: false,
     },
     userId: {
