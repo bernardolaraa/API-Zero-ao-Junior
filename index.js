@@ -14,23 +14,35 @@ app.use(session({
     cookie: {maxAge: 2 * 60 * 1000}
 }));
 
-function isAuthenticated(req, res, next){
+function userAuthenticated(req, res, next){
+    if(req.isAuthenticated()){
+        if(req.user.id == req.params.id){
+            return next()
+        }else{
+            return res.status(500).json({msg: "Você precisa estar logado com o proprio usuario para acessar essa rota!"});
+        };
+    }else{
+        return res.json({msg: "O usuario precisa estar logado para acessar essa rota!"});
+    };
+};
+
+function adminAuthenticated(req, res, next){
     if(req.isAuthenticated()){
         if(req.user.isAdmin){
-            return next();
+            return next()
         }else{
             return res.status(500).json({msg: "Você precisa ser um admin para acessar essa rota"});
-        }
+        };
     }else{
-        console.log(req);
         return res.json({msg: "O usuario precisa estar logado para acessar essa rota!"});
-    }
+    };
 };
 
 app.use(express.json());
 
 app.use(passport.initialize());
 app.use(passport.session());
+
 let login = function(req, res, next){
     res.locals.Users = req.Users || null
     console.log('LOGGED')
@@ -38,7 +50,6 @@ let login = function(req, res, next){
 };
 
 app.use(login)
-
 
 app.get('/success', async (req, res) => {
     res.send('Usuario foi logado com Sucesso!');
@@ -54,6 +65,7 @@ app.post('/auth', async (req, res, next) => {
         failureRedirect: "/failure",
     })(req, res, next);
 });
+
 
 app.delete('/text/:id', async (req, res) => {
     try {
@@ -92,22 +104,22 @@ app.put('/text/:id', async (req, res) => {
     }
 });
 
-app.put('/user/:id', isAuthenticated, async  (req, res) => {
+app.put('/user/:id', userAuthenticated, async  (req, res) => {
     try {
         const id = req.params.id;
         const userBody = req.body;
+        const user = await Users.findByPk(id);
+        console.log(user);
 
-        const user = await Users.update({
-            name: userBody.name,
-            email: userBody.email,
-            psw: userBody.psw,
-            isAdmin: userBody.isAdmin
-        }, {
-            where: {
-                id: id
-            }
-        });
-
+        if(!user) {
+            return res.status(400).send('Usuario não encontrado!');
+        }else{
+            user.name = userBody.name;
+            user.email = userBody.email;
+            user.psw = userBody.psw;
+        
+            await user.save();
+        }
         res.status(201).send(user);
     } catch (error) {
         res.status(500).send('Deu errado ' + error);
@@ -146,7 +158,7 @@ app.get('/text/:id', async (req, res) => {
     }
 });
 
-app.get('/users', isAuthenticated, async (req, res) => {
+app.get('/users', adminAuthenticated, async (req, res) => {
     try {
         const user = await Users.findAll();
 
