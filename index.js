@@ -5,6 +5,7 @@ const { Posts } = require('./models');
 const { Audios } = require('./models');
 const session = require('express-session');
 const passport = require('passport');
+
 require('./config/auth')(passport);
 
 app.use(session({
@@ -83,6 +84,29 @@ app.delete('/text/:id', async (req, res) => {
     }
 });
 
+app.put('/text/:id/audio/', async (req, res) => {
+    try {
+        const postId = req.params.id;
+        const text = await Posts.findOne({
+            where: {
+                id: postId
+            }
+        });
+
+        const audio = await Audios.update({
+            url: "http://api.voicerss.org/?key=13c4e8449f9344049da6d5b12743d4d0&hl=pt-br&src=" + `${text.text}`
+        }, {
+            where: {
+                postId: postId
+            }
+        });
+
+        res.status(201).send(audio);
+    } catch (error) {
+        res.status(500).send('Deu errado ' + error);
+    }
+});
+
 app.put('/text/:id', async (req, res) => {
     try {
         const id = req.params.id;
@@ -121,6 +145,33 @@ app.put('/user/:id', userAuthenticated, async  (req, res) => {
             await user.save();
         }
         res.status(201).send(user);
+    } catch (error) {
+        res.status(500).send('Deu errado ' + error);
+    }
+});
+
+app.get('/text/:id/audio/', async(req, res) => {
+    try {
+        const postId = req.params.id;
+        let audio;
+        
+        if(audio = await Audios.findOne({where: {postId: postId}})){
+            res.status(201).redirect(audio.url);
+        }else{
+            const text = await Posts.findOne({
+                where: {
+                    id: postId
+                }
+            });
+
+            const audioCreate = await Audios.create({
+                url: "http://api.voicerss.org/?key=13c4e8449f9344049da6d5b12743d4d0&hl=pt-br&src=" + `${text.text}`,
+                postId: postId,
+                userId: text.userId
+            });
+
+            res.status(201).redirect(audioCreate.url);
+        };
     } catch (error) {
         res.status(500).send('Deu errado ' + error);
     }
@@ -168,32 +219,29 @@ app.get('/users', adminAuthenticated, async (req, res) => {
     }
 });
 
-// app.post('/text/:id/audio', async (req, res) => {
-//     try {
-//         const id = req.params.id;
-//         const textCreate = await Posts.findOne({
-//             where: {
-//                 id: id
-//             }
-//         });
-//         const bla = await Audios.destroy({
-//             where: {
-//                 postId: id
-//             }
-//         });
 
-//         const audios = await Audios.create({
-//             url: ,
-//             postId: id,
-//             userId: req.body.userId
-//         });
 
-//         res.status(201).send(audios);
-//     } catch (error) {
-//         console.log(error)
-//         res.status(500).send('Deu errado ' + error);
-//     }
-// });
+app.post('/text/:id/audio', async (req, res) => {
+    try {
+        const id = req.params.id;
+        const text = await Posts.findOne({
+            where: {
+                id: id
+            }
+        });
+
+        const audios = await Audios.create({
+            url: "http://api.voicerss.org/?key=13c4e8449f9344049da6d5b12743d4d0&hl=pt-br&src=" + `${text.text}`,
+            postId: id,
+            userId: text.userId
+        });
+
+        res.status(201).send(audios);
+    } catch (error) {
+        console.log(error)
+        res.status(500).send('Deu errado ' + error);
+    }
+});
 
 app.post('/text', async (req, res) => {
     try {
