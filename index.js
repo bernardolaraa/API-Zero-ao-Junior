@@ -6,6 +6,7 @@ const { Audios } = require('./models');
 const session = require('express-session');
 const passport = require('passport');
 
+require('dotenv').config();
 require('./config/auth')(passport);
 
 app.use(session({
@@ -94,7 +95,7 @@ app.put('/text/:id/audio/', async (req, res) => {
         });
 
         const audio = await Audios.update({
-            url: "http://api.voicerss.org/?key=13c4e8449f9344049da6d5b12743d4d0&hl=pt-br&src=" + `${text.text}`
+            url: "http://api.voicerss.org/?key=" + `${process.env.RSS_KEY}` + "&hl=pt-br&src=" + `${text.text}`
         }, {
             where: {
                 postId: postId
@@ -165,7 +166,7 @@ app.get('/text/:id/audio/', async(req, res) => {
             });
 
             const audioCreate = await Audios.create({
-                url: "http://api.voicerss.org/?key=13c4e8449f9344049da6d5b12743d4d0&hl=pt-br&src=" + `${text.text}`,
+                url: "http://api.voicerss.org/?key=" + `${process.env.RSS_KEY}` + "&hl=pt-br&src=" + `${text.text}`,
                 postId: postId,
                 userId: text.userId
             });
@@ -231,7 +232,7 @@ app.post('/text/:id/audio', async (req, res) => {
         });
 
         const audios = await Audios.create({
-            url: "http://api.voicerss.org/?key=13c4e8449f9344049da6d5b12743d4d0&hl=pt-br&src=" + `${text.text}`,
+            url: "http://api.voicerss.org/?key=" + `${process.env.RSS_KEY}` + "&hl=pt-br&src=" + `${text.text}`,
             postId: id,
             userId: text.userId
         });
