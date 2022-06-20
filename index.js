@@ -5,9 +5,16 @@ const { Posts } = require('./models');
 const { Audios } = require('./models');
 const session = require('express-session');
 const passport = require('passport');
+const cloudinary = require('cloudinary').v2;
 
 require('dotenv').config();
 require('./config/auth')(passport);
+
+cloudinary.config({ 
+    cloud_name: process.env.CLOUD_NAME, 
+    api_key: process.env.CLOUD_API_KEY, 
+    api_secret: process.env.CLOUD_API_SECRET
+  });
 
 app.use(session({
     secret: "PassportLogin",
@@ -15,6 +22,19 @@ app.use(session({
     saveUninitialized: false,
     cookie: {maxAge: 2 * 60 * 1000}
 }));
+
+app.use(express.json());
+
+app.use(passport.initialize());
+app.use(passport.session());
+
+const login = function(req, res, next){
+    res.locals.Users = req.Users || null
+    console.log('LOGGED')
+    next();
+};
+
+app.use(login);
 
 function userAuthenticated(req, res, next){
     if(req.isAuthenticated()){
@@ -40,19 +60,6 @@ function adminAuthenticated(req, res, next){
     };
 };
 
-app.use(express.json());
-
-app.use(passport.initialize());
-app.use(passport.session());
-
-let login = function(req, res, next){
-    res.locals.Users = req.Users || null
-    console.log('LOGGED')
-    next();
-};
-
-app.use(login)
-
 app.get('/success', async (req, res) => {
     res.send('Usuario foi logado com Sucesso!');
 });
@@ -68,7 +75,6 @@ app.post('/auth', async (req, res, next) => {
     })(req, res, next);
 });
 
-
 app.delete('/text/:id', async (req, res) => {
     try {
         const id = req.params.id;
@@ -79,7 +85,7 @@ app.delete('/text/:id', async (req, res) => {
             }
         });
 
-        res.status(201).send('Usuario Deletado');
+        res.status(201).send('Texto Deletado');
     } catch (error) {
         res.status(500).send('Deu errado ' + error);
     }
@@ -94,8 +100,14 @@ app.put('/text/:id/audio/', async (req, res) => {
             }
         });
 
+        const url = await cloudinary.uploader.upload("http://api.voicerss.org/?key=" + `${process.env.RSS_KEY}` + "&hl=pt-br&src=" + `${text.text}`, 
+            { resource_type: "video" },
+            function(error, result) {
+                console.log(result, error); 
+            });
+
         const audio = await Audios.update({
-            url: "http://api.voicerss.org/?key=" + `${process.env.RSS_KEY}` + "&hl=pt-br&src=" + `${text.text}`
+            url: url.url
         }, {
             where: {
                 postId: postId
@@ -155,7 +167,7 @@ app.get('/text/:id/audio/', async(req, res) => {
     try {
         const postId = req.params.id;
         let audio;
-        
+
         if(audio = await Audios.findOne({where: {postId: postId}})){
             res.status(201).redirect(audio.url);
         }else{
@@ -165,8 +177,14 @@ app.get('/text/:id/audio/', async(req, res) => {
                 }
             });
 
+            const url = await cloudinary.uploader.upload("http://api.voicerss.org/?key=" + `${process.env.RSS_KEY}` + "&hl=pt-br&src=" + `${text.text}`, 
+            { resource_type: "video" },
+            function(error, result) {
+                console.log(result, error); 
+            });
+
             const audioCreate = await Audios.create({
-                url: "http://api.voicerss.org/?key=" + `${process.env.RSS_KEY}` + "&hl=pt-br&src=" + `${text.text}`,
+                url: url.url,
                 postId: postId,
                 userId: text.userId
             });
@@ -231,8 +249,14 @@ app.post('/text/:id/audio', async (req, res) => {
             }
         });
 
+        const url = await cloudinary.uploader.upload("http://api.voicerss.org/?key=" + `${process.env.RSS_KEY}` + "&hl=pt-br&src=" + `${text.text}`, 
+            { resource_type: "video" },
+            function(error, result) {
+                console.log(result, error); 
+            });
+
         const audios = await Audios.create({
-            url: "http://api.voicerss.org/?key=" + `${process.env.RSS_KEY}` + "&hl=pt-br&src=" + `${text.text}`,
+            url: url.url,
             postId: id,
             userId: text.userId
         });
