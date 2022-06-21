@@ -6,16 +6,16 @@ module.exports = {
       id: {
         type: Sequelize.DataTypes.UUID,
         defaultValue: Sequelize.DataTypes.UUIDV4,
-        primaryKey: true,
+        primaryKey: true
       },
       name: {
         type: Sequelize.DataTypes.STRING(50),
-        allowNull: false,
+        allowNull: false
       },
       email: {
         type: Sequelize.DataTypes.STRING(50),
         allowNull: false, 
-        unique: true,
+        unique: true
       },
       psw: {
         type: Sequelize.DataTypes.STRING(255),
@@ -23,7 +23,7 @@ module.exports = {
       },
       isAdmin: {
         type: Sequelize.DataTypes.BOOLEAN,
-        allowNull: false,
+        allowNull: false
       },
       updatedAt: Sequelize.DataTypes.DATE,
       createdAt: Sequelize.DataTypes.DATE

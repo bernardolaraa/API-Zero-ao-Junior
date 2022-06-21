@@ -14,7 +14,7 @@ cloudinary.config({
     cloud_name: process.env.CLOUD_NAME, 
     api_key: process.env.CLOUD_API_KEY, 
     api_secret: process.env.CLOUD_API_SECRET
-  });
+});
 
 app.use(session({
     secret: "PassportLogin",
@@ -41,7 +41,7 @@ function userAuthenticated(req, res, next){
         if(req.user.id == req.params.id){
             return next()
         }else{
-            return res.status(500).json({msg: "Você precisa estar logado com o proprio usuario para acessar essa rota!"});
+            return res.status(401).json({msg: "Você precisa estar logado com o proprio usuario para acessar essa rota!"});
         };
     }else{
         return res.json({msg: "O usuario precisa estar logado para acessar essa rota!"});
@@ -53,7 +53,7 @@ function adminAuthenticated(req, res, next){
         if(req.user.isAdmin){
             return next()
         }else{
-            return res.status(500).json({msg: "Você precisa ser um admin para acessar essa rota"});
+            return res.status(403).json({msg: "Você precisa ser um admin para acessar essa rota"});
         };
     }else{
         return res.json({msg: "O usuario precisa estar logado para acessar essa rota!"});
@@ -61,11 +61,11 @@ function adminAuthenticated(req, res, next){
 };
 
 app.get('/success', async (req, res) => {
-    res.send('Usuario foi logado com Sucesso!');
+    res.status(200).send('Usuario foi logado com Sucesso!');
 });
 
 app.get('/failure', async (req, res) => {
-    res.send('Credenciais Inválidas!');
+    res.status(403).send('Credenciais Inválidas!');
 });
 
 app.post('/auth', async (req, res, next) => {
@@ -85,7 +85,7 @@ app.delete('/text/:id', async (req, res) => {
             }
         });
 
-        res.status(201).send('Texto Deletado');
+        res.status(200).send('Texto Deletado');
     } catch (error) {
         res.status(500).send('Deu errado ' + error);
     }
@@ -114,7 +114,7 @@ app.put('/text/:id/audio/', async (req, res) => {
             }
         });
 
-        res.status(201).send(audio);
+        res.status(200).send(audio);
     } catch (error) {
         res.status(500).send('Deu errado ' + error);
     }
@@ -135,7 +135,7 @@ app.put('/text/:id', async (req, res) => {
             }
         });
 
-        res.status(201).send(postsBody);
+        res.status(200).send(posts);
     } catch (error) {
         res.status(500).send('Deu errado ' + error);
     }
@@ -157,7 +157,7 @@ app.put('/user/:id', userAuthenticated, async  (req, res) => {
         
             await user.save();
         }
-        res.status(201).send(user);
+        res.status(200).send(user);
     } catch (error) {
         res.status(500).send('Deu errado ' + error);
     }
@@ -169,7 +169,7 @@ app.get('/text/:id/audio/', async(req, res) => {
         let audio;
 
         if(audio = await Audios.findOne({where: {postId: postId}})){
-            res.status(201).redirect(audio.url);
+            res.status(200).redirect(audio.url);
         }else{
             const text = await Posts.findOne({
                 where: {
@@ -206,7 +206,7 @@ app.get('/user/:id/texts', async (req, res) => {
             }
         });
 
-        res.status(201).send(post);
+        res.status(200).send(post);
     } catch (error) {
         res.status(500).send('Deu errado ' + error);
     }
@@ -222,7 +222,7 @@ app.get('/text/:id', async (req, res) => {
             } 
         });
         
-        res.status(201).send(post);
+        res.status(200).send(post);
     } catch (error) {
         res.status(500).send('Deu errado ' + error);
     }
@@ -232,7 +232,7 @@ app.get('/users', adminAuthenticated, async (req, res) => {
     try {
         const user = await Users.findAll();
 
-        res.status(201).send(user);
+        res.status(200).send(user);
     } catch (error) {
         res.status(500).send('Deu errado' + error);
     }
@@ -263,7 +263,6 @@ app.post('/text/:id/audio', async (req, res) => {
 
         res.status(201).send(audios);
     } catch (error) {
-        console.log(error)
         res.status(500).send('Deu errado ' + error);
     }
 });
@@ -275,10 +274,11 @@ app.post('/text', async (req, res) => {
             title: postsBody.title,
             subtitle: postsBody.subtitle,
             text: postsBody.text,
-            userId: postsBody.userId,
+            userId: postsBody.userId
         });
         res.status(201).send(post);
     } catch (error) {
+        console.log(error);
         res.status(500).send('Deu errado ' + error);
     }
 });
@@ -295,7 +295,6 @@ app.post('/user', async (req, res) => {
 
         res.status(201).send(user);
     } catch (error) {
-        console.log(error);
         res.status(500).send('Deu errado ' + error);
     }
 });
