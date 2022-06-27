@@ -17,6 +17,7 @@ module.exports = {
         type: Sequelize.DataTypes.UUID,
         defaultValue: Sequelize.DataTypes.UUIDV4,
         allowNull: false,
+        unique: true,
         references: {
           model: {
             tableName: "Posts",
