@@ -29,8 +29,8 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 const login = function(req, res, next){
-    res.locals.Users = req.Users || null
-    console.log('LOGGED')
+    res.locals.Users = req.Users || null;
+    console.log('LOGGED');
     next();
 };
 
@@ -100,7 +100,7 @@ app.put('/text/:id/audio/', async (req, res) => {
             }
         });
 
-        const url = await cloudinary.uploader.upload("http://api.voicerss.org/?key=" + `${process.env.RSS_KEY}` + "&hl=pt-br&src=" + `${text.text}`, 
+        const url = await cloudinary.uploader.upload(`http://api.voicerss.org/?key=${process.env.RSS_KEY}&hl=pt-br&src=${text.text}`, 
             { resource_type: "video" },
             function(error, result) {
                 console.log(result, error); 
@@ -146,7 +146,6 @@ app.put('/user/:id', userAuthenticated, async  (req, res) => {
         const id = req.params.id;
         const userBody = req.body;
         const user = await Users.findByPk(id);
-        console.log(user);
 
         if(!user) {
             return res.status(400).send('Usuario não encontrado!');
@@ -177,7 +176,7 @@ app.get('/text/:id/audio/', async(req, res) => {
                 }
             });
 
-            const url = await cloudinary.uploader.upload("http://api.voicerss.org/?key=" + `${process.env.RSS_KEY}` + "&hl=pt-br&src=" + `${text.text}`, 
+            const url = await cloudinary.uploader.upload(`http://api.voicerss.org/?key=${process.env.RSS_KEY}&hl=pt-br&src=${text.text}`, 
             { resource_type: "video" },
             function(error, result) {
                 console.log(result, error); 
@@ -249,7 +248,7 @@ app.post('/text/:id/audio', async (req, res) => {
             }
         });
 
-        const url = await cloudinary.uploader.upload("http://api.voicerss.org/?key=" + `${process.env.RSS_KEY}` + "&hl=pt-br&src=" + `${text.text}`, 
+        const url = await cloudinary.uploader.upload(`http://api.voicerss.org/?key=${process.env.RSS_KEY}&hl=pt-br&src=${text.text}`, 
             { resource_type: "video" },
             function(error, result) {
                 console.log(result, error); 
@@ -278,7 +277,6 @@ app.post('/text', async (req, res) => {
         });
         res.status(201).send(post);
     } catch (error) {
-        console.log(error);
         res.status(500).send('Deu errado ' + error);
     }
 });
@@ -300,7 +298,10 @@ app.post('/user', async (req, res) => {
 });
 
 
+if (process.env.NODE_ENV !== 'test') {
+    app.listen(6000, () => {
+        console.log('Meu servidor esta rodando');
+    });
+};
 
-app.listen(6000, () => {
-    console.log('Meu servidor esta rodando');
-});
+module.exports = app;
