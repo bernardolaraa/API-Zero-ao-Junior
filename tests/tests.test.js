@@ -111,7 +111,7 @@ describe('Text route tests', () => {
         const { body, statusCode } = await request(app).get(`/user/${randomUser.id}/texts`);
 
         for(let i = 0; i < body.length; i++){
-            expect(body[i].userId).toBe(process.env.ID_TEST);
+            expect(body[i].userId).toBe(randomUser.id);
         }
     });
 
